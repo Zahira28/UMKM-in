@@ -3,5 +3,5 @@ UMKM-in adalah platform social-commerce terpadu yang menggabungkan linimasa penj
 
 **tim trio**
 * **Ketua Kelompok:** Aulia Nur Fajri Tri Anggoro - 24/535054/TK/59327
-* **Anggota 1:** 
+* **Anggota 1:** Josiah Hermes - 24/543958/TK/60463
 * **Anggota 2:** Zahira Anindya Putri - 24/543202/TK/60347
