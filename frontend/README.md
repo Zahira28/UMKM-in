@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UMKM-in Frontend Client
 
-## Getting Started
+Antarmuka web untuk platform UMKM-in, dibangun menggunakan Next.js (App Router), React 19, Tailwind CSS v4, dan TypeScript.
 
-First, run the development server:
+## Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Framework: Next.js (App Router)
+- Library: React 19
+- Styling: Tailwind CSS v4
+- Language: TypeScript
+- Code Quality: ESLint
+
+## Struktur Direktori
+
+```text
+frontend/
+├── app/                     # Halaman dan routing Next.js App Router
+│   ├── globals.css          # Konfigurasi gaya global dan Tailwind
+│   ├── layout.tsx           # Root layout aplikasi
+│   └── page.tsx             # Halaman utama aplikasi
+├── public/                  # Berkas statis publik (gambar, ikon, font)
+├── src/                     # Komponen dan modul pendukung aplikasi
+│   ├── components/          # Komponen antarmuka yang dapat digunakan kembali
+│   │   ├── elements/        # Komponen elemen dasar
+│   │   ├── layout/          # Komponen tata letak (navbar, sidebar, footer)
+│   │   └── ui/              # Komponen antarmuka pengguna umum (button, modal, card)
+│   ├── hooks/               # Custom React hooks
+│   ├── lib/                 # Utilitas pustaka eksternal dan fungsi bantuan
+│   └── modules/             # Modul logika berbasis fitur
+├── eslint.config.mjs        # Konfigurasi linting ESLint
+├── next.config.ts           # Konfigurasi Next.js
+├── package.json             # Daftar pustaka dependensi dan skrip proyek
+├── postcss.config.mjs       # Konfigurasi PostCSS untuk Tailwind CSS v4
+└── tsconfig.json            # Konfigurasi TypeScript dan path alias (@/*)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cara Menjalankan
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Prasyarat
+- Node.js versi 20 ke atas.
+- Paket manajer seperti npm, pnpm, atau yarn.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Instalasi Dependensi
+Jalankan perintah berikut di dalam direktori frontend:
+```bash
+npm install
+```
 
-## Learn More
+### 3. Konfigurasi Environment
+Buat berkas .env.local di dalam direktori frontend untuk konfigurasi URL endpoint backend:
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Menjalankan Server Pengembangan
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Buka peramban di http://localhost:3000 untuk melihat tampilan aplikasi.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Skrip yang Tersedia
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- npm run dev : Menjalankan server pengembangan lokal dengan fitur hot reload.
+- npm run build : Melakukan kompilasi dan optimasi aplikasi untuk tahap produksi.
+- npm run start : Menjalankan server aplikasi hasil kompilasi produksi.
+- npm run lint : Memeriksa standar penulisan kode menggunakan ESLint.
