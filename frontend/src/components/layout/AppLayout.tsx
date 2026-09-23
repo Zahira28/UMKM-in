@@ -6,6 +6,7 @@ import Sidebar from './Sidebar';
 import CommentsModal from '../feed/CommentsModal';
 import DeleteModal from '../modals/DeleteModal';
 import WarningModal from '../modals/WarningModal';
+import ProductDetailModal from '../modals/ProductDetailModal';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -23,6 +24,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Global Modals */}
+      <ProductDetailModal />
       <CommentsModal />
       <DeleteModal />
       <WarningModal />

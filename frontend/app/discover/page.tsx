@@ -6,7 +6,7 @@ import { Search, Heart, MessageCircle } from 'lucide-react';
 import { useApp } from '../../src/context/AppContext';
 
 export default function DiscoverPage() {
-  const { products, openCommentModal } = useApp();
+  const { products, openCommentModal, openDetailModal, toggleLike, likesMap } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
 
@@ -67,60 +67,76 @@ export default function DiscoverPage() {
 
       {/* Product Image Grid (3 Columns) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-        {filteredProducts.map((product) => (
-          <div
-            key={product.id}
-            className="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-xs aspect-square cursor-pointer transition-all duration-300 hover:shadow-lg"
-          >
-            <img
-              src={product.imageUrl}
-              alt={product.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
+        {filteredProducts.map((product) => {
+          const isLiked = !!likesMap[product.id];
+          return (
+            <div
+              key={product.id}
+              onClick={() => openDetailModal(product.id)}
+              className="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-xs aspect-square cursor-pointer transition-all duration-300 hover:shadow-lg"
+            >
+              <img
+                src={product.imageUrl}
+                alt={product.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
 
-            {/* Hover Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-4 flex flex-col justify-between text-white">
-              <div className="flex justify-between items-start">
-                <span className="bg-white/20 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
-                  {product.category}
-                </span>
-              </div>
-
-              <div className="space-y-2">
-                <div>
-                  <h4 className="font-bold text-sm line-clamp-1">{product.title}</h4>
-                  <p className="text-xs text-white/80">@{product.username}</p>
+              {/* Hover Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-4 flex flex-col justify-between text-white">
+                <div className="flex justify-between items-start">
+                  <span className="bg-white/20 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                    {product.category}
+                  </span>
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-3 text-xs font-semibold">
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-4 h-4 fill-white text-white" />
-                      {product.likesCount}
-                    </span>
+                <div className="space-y-2">
+                  <div>
+                    <h4 className="font-bold text-sm line-clamp-1">{product.title}</h4>
+                    <p className="text-xs text-white/80">@{product.username}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-3 text-xs font-semibold">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(product.id);
+                        }}
+                        className="flex items-center gap-1 hover:text-red-300 transition-colors"
+                      >
+                        <Heart
+                          fill={isLiked ? '#ef4444' : 'white'}
+                          className={`w-4 h-4 ${isLiked ? 'text-red-500' : 'text-white'}`}
+                        />
+                        <span>{product.likesCount}</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCommentModal(product.id);
+                        }}
+                        className="flex items-center gap-1 hover:text-emerald-300 transition-colors"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        {product.commentsCount}
+                      </button>
+                    </div>
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        openCommentModal(product.id);
+                        openDetailModal(product.id);
                       }}
-                      className="flex items-center gap-1 hover:text-emerald-300 transition-colors"
+                      className="text-xs font-bold text-[#10B981] bg-white px-3 py-1.5 rounded-xl hover:bg-emerald-50 transition-colors"
                     >
-                      <MessageCircle className="w-4 h-4" />
-                      {product.commentsCount}
+                      Lihat Produk
                     </button>
                   </div>
-
-                  <Link
-                    href={`/profile/${product.username}`}
-                    className="text-xs font-bold text-[#10B981] bg-white px-3 py-1.5 rounded-xl hover:bg-emerald-50 transition-colors"
-                  >
-                    Lihat Produk
-                  </Link>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

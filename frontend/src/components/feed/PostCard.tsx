@@ -11,7 +11,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({ product }: PostCardProps) {
-  const { likesMap, toggleLike, openCommentModal, openDeleteModal, currentUser } = useApp();
+  const { likesMap, toggleLike, openCommentModal, openDeleteModal, closeDetailModal, currentUser } = useApp();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +82,10 @@ export default function PostCard({ product }: PostCardProps) {
                 <>
                   <Link
                     href={`/edit/${product.id}`}
-                    onClick={() => setMenuOpen(false)}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      closeDetailModal();
+                    }}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     <Edit3 className="w-4 h-4 text-gray-500" />
@@ -91,6 +94,7 @@ export default function PostCard({ product }: PostCardProps) {
                   <button
                     onClick={() => {
                       setMenuOpen(false);
+                      closeDetailModal();
                       openDeleteModal(product);
                     }}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left"
@@ -128,14 +132,15 @@ export default function PostCard({ product }: PostCardProps) {
             {/* Like Button */}
             <button
               onClick={() => toggleLike(product.id)}
-              className="group flex items-center gap-1.5 text-gray-700 hover:text-red-500 transition-colors"
+              className="group flex items-center gap-1.5 transition-colors"
             >
               <Heart
+                fill={isLiked ? '#ef4444' : 'none'}
                 className={`w-6 h-6 transition-transform group-active:scale-125 ${
-                  isLiked ? 'fill-red-500 text-red-500' : 'text-gray-700'
+                  isLiked ? 'text-red-500' : 'text-gray-700'
                 }`}
               />
-              <span className="text-xs font-semibold text-gray-700">
+              <span className={`text-xs font-semibold ${isLiked ? 'text-red-500' : 'text-gray-700'}`}>
                 {product.likesCount}
               </span>
             </button>

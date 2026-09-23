@@ -7,10 +7,11 @@ import { Heart, MessageCircle } from 'lucide-react';
 
 export default function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = use(params);
-  const { products, followingMap, toggleFollow, openCommentModal } = useApp();
+  const normalizedUsername = decodeURIComponent(username).toLowerCase();
+  const { products, followingMap, toggleFollow, openCommentModal, openDetailModal, toggleLike, likesMap } = useApp();
 
-  const isFollowed = !!followingMap[username];
-  const userObj = otherUsersMock[username] || {
+  const isFollowed = !!followingMap[normalizedUsername] || !!followingMap[username];
+  const userObj = otherUsersMock[normalizedUsername] || otherUsersMock[username] || {
     id: 'u_' + username,
     username,
     fullName: username.replace('_', ' '),
@@ -22,7 +23,9 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
     followersCount: 1200,
   };
 
-  const userProducts = products.filter((p) => p.username === username);
+  const userProducts = products.filter(
+    (p) => p.username.toLowerCase() === normalizedUsername || p.username === username
+  );
 
   const handleWhatsAppChat = () => {
     const message = encodeURIComponent(`Halo *${userObj.fullName}*, saya ingin bertanya mengenai produk UMKM-in Anda!`);
@@ -94,46 +97,59 @@ export default function UserProfilePage({ params }: { params: Promise<{ username
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-          {userProducts.map((product) => (
-            <div
-              key={product.id}
-              className="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-xs aspect-square cursor-pointer transition-all duration-300 hover:shadow-lg"
-            >
-              <img
-                src={product.imageUrl}
-                alt={product.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+          {userProducts.map((product) => {
+            const isLiked = !!likesMap[product.id];
+            return (
+              <div
+                key={product.id}
+                onClick={() => openDetailModal(product.id)}
+                className="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-xs aspect-square cursor-pointer transition-all duration-300 hover:shadow-lg"
+              >
+                <img
+                  src={product.imageUrl}
+                  alt={product.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
 
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-4 flex flex-col justify-between text-white">
-                <span className="bg-white/20 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-full w-fit">
-                  {product.category}
-                </span>
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-4 flex flex-col justify-between text-white">
+                  <span className="bg-white/20 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-full w-fit">
+                    {product.category}
+                  </span>
 
-                <div>
-                  <h4 className="font-bold text-sm line-clamp-1">{product.title}</h4>
-                  <p className="text-xs text-white/80">Rp {product.price.toLocaleString('id-ID')}</p>
+                  <div>
+                    <h4 className="font-bold text-sm line-clamp-1">{product.title}</h4>
+                    <p className="text-xs text-white/80">Rp {product.price.toLocaleString('id-ID')}</p>
 
-                  <div className="flex items-center gap-4 text-xs font-semibold pt-2">
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-4 h-4 fill-white text-white" />
-                      {product.likesCount}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openCommentModal(product.id);
-                      }}
-                      className="flex items-center gap-1 hover:text-emerald-300 transition-colors"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      {product.commentsCount}
-                    </button>
+                    <div className="flex items-center gap-4 text-xs font-semibold pt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(product.id);
+                        }}
+                        className="flex items-center gap-1 hover:text-red-300 transition-colors"
+                      >
+                        <Heart
+                          fill={isLiked ? '#ef4444' : 'white'}
+                          className={`w-4 h-4 ${isLiked ? 'text-red-500' : 'text-white'}`}
+                        />
+                        <span>{product.likesCount}</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCommentModal(product.id);
+                        }}
+                        className="flex items-center gap-1 hover:text-emerald-300 transition-colors"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        {product.commentsCount}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

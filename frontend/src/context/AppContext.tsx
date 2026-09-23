@@ -11,6 +11,7 @@ interface AppContextType {
   likesMap: Record<string, boolean>;
   commentsMap: Record<string, Comment[]>;
   activeCommentProductId: string | null;
+  activeDetailProductId: string | null;
   deleteModalProduct: Product | null;
   warningModalConfig: { isOpen: boolean; onConfirm?: () => void } | null;
   
@@ -25,6 +26,8 @@ interface AppContextType {
   // Modal handlers
   openCommentModal: (productId: string) => void;
   closeCommentModal: () => void;
+  openDetailModal: (productId: string) => void;
+  closeDetailModal: () => void;
   openDeleteModal: (product: Product) => void;
   closeDeleteModal: () => void;
   confirmDeleteProduct: () => void;
@@ -46,6 +49,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   // Modals state
   const [activeCommentProductId, setActiveCommentProductId] = useState<string | null>(null);
+  const [activeDetailProductId, setActiveDetailProductId] = useState<string | null>(null);
   const [deleteModalProduct, setDeleteModalProduct] = useState<Product | null>(null);
   const [warningModalConfig, setWarningModalConfig] = useState<{ isOpen: boolean; onConfirm?: () => void } | null>(null);
 
@@ -67,10 +71,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleFollow = (username: string) => {
-    setFollowingMap((prev) => ({
-      ...prev,
-      [username]: !prev[username],
-    }));
+    const key = username.toLowerCase();
+    setFollowingMap((prev) => {
+      const isCurrentlyFollowed = prev[key] ?? prev[username] ?? false;
+      const nextVal = !isCurrentlyFollowed;
+      return {
+        ...prev,
+        [key]: nextVal,
+        [username]: nextVal,
+      };
+    });
   };
 
   const addProduct = (newProdData: Omit<Product, 'id' | 'likesCount' | 'commentsCount' | 'createdAt'>) => {
@@ -121,6 +131,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const openCommentModal = (productId: string) => setActiveCommentProductId(productId);
   const closeCommentModal = () => setActiveCommentProductId(null);
   
+  const openDetailModal = (productId: string) => setActiveDetailProductId(productId);
+  const closeDetailModal = () => setActiveDetailProductId(null);
+
   const openDeleteModal = (product: Product) => setDeleteModalProduct(product);
   const closeDeleteModal = () => setDeleteModalProduct(null);
   const confirmDeleteProduct = () => {
@@ -144,6 +157,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         likesMap,
         commentsMap,
         activeCommentProductId,
+        activeDetailProductId,
         deleteModalProduct,
         warningModalConfig,
         toggleLike,
@@ -154,6 +168,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addComment,
         openCommentModal,
         closeCommentModal,
+        openDetailModal,
+        closeDetailModal,
         openDeleteModal,
         closeDeleteModal,
         confirmDeleteProduct,
