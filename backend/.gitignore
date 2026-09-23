@@ -1,0 +1,22 @@
+# Build & Binary outputs
+/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+main
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
