@@ -46,6 +46,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&model.Product{},
 		&model.Comment{},
 		&model.Like{},
+		&model.Follow{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to auto-migrate tables: %w", err)
