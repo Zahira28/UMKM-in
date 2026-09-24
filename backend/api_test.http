@@ -1,0 +1,68 @@
+### UMKM-in Backend API Testing File
+### Gunakan ekstensi "REST Client" atau "Thunder Client" di VS Code untuk mengeksekusi request ini langsung.
+
+@baseUrl = http://localhost:8080/api/v1
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### 1. Health Check
+GET http://localhost:8080/api/health
+
+### 2. Register Akun Baru
+# Setelah request ini dijalankan, cek terminal backend untuk melihat kode [DEV OTP]
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "full_name": "Ayu Lestari",
+  "email": "ayu.lestari@example.com",
+  "password": "PasswordRahasia123!"
+}
+
+### 3. Verifikasi OTP Email
+# Masukkan kode OTP 6 digit yang tercetak di terminal backend
+POST {{baseUrl}}/auth/verify-otp
+Content-Type: application/json
+
+{
+  "email": "ayu.lestari@example.com",
+  "otp_code": "123456"
+}
+
+### 4. Kirim Ulang Kode OTP
+POST {{baseUrl}}/auth/resend-otp
+Content-Type: application/json
+
+{
+  "email": "ayu.lestari@example.com"
+}
+
+### 5. Login Akun Manual
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email_or_username": "ayu.lestari@example.com",
+  "password": "PasswordRahasia123!"
+}
+
+### 6. Ambil Profil Saya (Protected - Wajib Sertakan Token JWT)
+# Salin token dari respon login/verify-otp ke header Authorization di bawah:
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}}
+
+### 7. Perbarui Profil / Onboarding (Protected)
+PUT {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "username": "ayu_dapur",
+  "full_name": "Ayu Lestari - Dapur Bunda",
+  "phone_number": "6281234567890",
+  "bio": "Menjual aneka camilan dan kue rumahan khas Bandung.",
+  "city": "Bandung, Jawa Barat",
+  "address_detail": "Jl. Cihampelas No. 12, Bandung",
+  "latitude": -6.899201,
+  "longitude": 107.604212,
+  "avatar_url": "https://storage.umkm-in.id/avatars/ayu.jpg"
+}

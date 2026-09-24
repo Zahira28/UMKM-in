@@ -6,6 +6,9 @@ import (
 
 	"backend/internal/config"
 	"backend/internal/database"
+	"backend/internal/handler"
+	"backend/internal/repository"
+	"backend/internal/service"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -33,12 +36,28 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
+	// Health check endpoint
 	app.Get("/api/health", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"status":  "success",
 			"message": "UMKM-in backend service is running!",
 		})
 	})
+	app.Get("/api/v1/health", func(c *fiber.Ctx) error {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"status":  "success",
+			"message": "UMKM-in backend service is running!",
+		})
+	})
+
+	// Dependency injection for authentication module
+	if db != nil {
+		userRepo := repository.NewUserRepository(db)
+		authService := service.NewAuthService(userRepo, cfg)
+		authHandler := handler.NewAuthHandler(authService)
+
+		handler.SetupRoutes(app, authHandler, cfg.JWTSecret)
+	}
 
 	addr := fmt.Sprintf(":%s", cfg.AppPort)
 	log.Printf("Server is running on http://localhost%s\n", addr)
