@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"backend/internal/model"
 	"backend/internal/repository"
 	"backend/internal/utils"
+	"backend/pkg/apperror"
 
 	"github.com/google/uuid"
 )
@@ -85,27 +85,31 @@ func (s *authService) Register(req RegisterRequest) (*model.User, error) {
 	req.FullName = strings.TrimSpace(req.FullName)
 
 	if req.Email == "" || req.Password == "" || req.FullName == "" {
-		return nil, errors.New("nama lengkap, email, dan kata sandi wajib diisi")
+		return nil, apperror.BadRequest("Nama lengkap, email, dan kata sandi wajib diisi")
 	}
 
 	if len(req.Password) < 6 {
-		return nil, errors.New("kata sandi minimal 6 karakter")
+		return nil, apperror.BadRequest("Kata sandi minimal 6 karakter")
 	}
 
 	existingUser, err := s.userRepo.FindByEmail(req.Email)
 	if err != nil {
-		return nil, err
+		return nil, apperror.Internal("Gagal memeriksa ketersediaan email di database", err)
 	}
 	if existingUser != nil {
-		return nil, errors.New("email sudah terdaftar dalam sistem")
+		return nil, apperror.Conflict("Email sudah terdaftar dalam sistem")
 	}
 
 	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
-		return nil, errors.New("gagal mengamankan kata sandi")
+		return nil, apperror.Internal("Gagal mengenkripsi kata sandi", err)
 	}
 
-	otpCode := utils.GenerateOTP()
+	otpCode, err := utils.GenerateOTP()
+	if err != nil {
+		return nil, apperror.Internal("Gagal menghasilkan kode verifikasi", err)
+	}
+
 	expiresAt := time.Now().Add(10 * time.Minute)
 
 	user := &model.User{
@@ -119,7 +123,7 @@ func (s *authService) Register(req RegisterRequest) (*model.User, error) {
 	}
 
 	if err := s.userRepo.Create(user); err != nil {
-		return nil, fmt.Errorf("gagal mendaftarkan pengguna: %w", err)
+		return nil, apperror.Internal("Gagal mendaftarkan pengguna ke basis data", err)
 	}
 
 	log.Printf("[DEV OTP] Verification code for %s is: %s (expires in 10 minutes)\n", user.Email, otpCode)
@@ -132,31 +136,31 @@ func (s *authService) VerifyOTP(req VerifyOTPRequest) (*AuthResponse, error) {
 	req.OTPCode = strings.TrimSpace(req.OTPCode)
 
 	if req.Email == "" || req.OTPCode == "" {
-		return nil, errors.New("email dan kode OTP wajib diisi")
+		return nil, apperror.BadRequest("Email dan kode OTP wajib diisi")
 	}
 
 	user, err := s.userRepo.FindByEmail(req.Email)
 	if err != nil {
-		return nil, err
+		return nil, apperror.Internal("Gagal mengambil data akun", err)
 	}
 	if user == nil {
-		return nil, errors.New("akun dengan email tersebut tidak ditemukan")
+		return nil, apperror.NotFound("Akun dengan email tersebut tidak ditemukan")
 	}
 
 	if user.IsVerified {
 		token, err := utils.GenerateToken(user.ID, user.Email, user.Username, s.jwtSecret, 7*24*time.Hour)
 		if err != nil {
-			return nil, errors.New("gagal menerbitkan token sesi")
+			return nil, apperror.Internal("Gagal menerbitkan token sesi", err)
 		}
 		return &AuthResponse{Token: token, User: user}, nil
 	}
 
 	if user.VerificationCode != req.OTPCode {
-		return nil, errors.New("kode OTP tidak valid atau salah")
+		return nil, apperror.BadRequest("Kode OTP yang Anda masukkan salah")
 	}
 
 	if user.CodeExpiresAt == nil || time.Now().After(*user.CodeExpiresAt) {
-		return nil, errors.New("kode OTP sudah kedaluwarsa, silakan minta kode baru")
+		return nil, apperror.BadRequest("Kode OTP sudah kedaluwarsa, silakan minta kode baru")
 	}
 
 	user.IsVerified = true
@@ -164,12 +168,12 @@ func (s *authService) VerifyOTP(req VerifyOTPRequest) (*AuthResponse, error) {
 	user.CodeExpiresAt = nil
 
 	if err := s.userRepo.Update(user); err != nil {
-		return nil, errors.New("gagal memperbarui status verifikasi")
+		return nil, apperror.Internal("Gagal memperbarui status verifikasi akun", err)
 	}
 
 	token, err := utils.GenerateToken(user.ID, user.Email, user.Username, s.jwtSecret, 7*24*time.Hour)
 	if err != nil {
-		return nil, errors.New("gagal menerbitkan token sesi")
+		return nil, apperror.Internal("Gagal menerbitkan token sesi", err)
 	}
 
 	return &AuthResponse{
@@ -182,29 +186,33 @@ func (s *authService) ResendOTP(req ResendOTPRequest) error {
 	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
 
 	if req.Email == "" {
-		return errors.New("email wajib diisi")
+		return apperror.BadRequest("Email wajib diisi")
 	}
 
 	user, err := s.userRepo.FindByEmail(req.Email)
 	if err != nil {
-		return err
+		return apperror.Internal("Gagal memeriksa status akun", err)
 	}
 	if user == nil {
-		return errors.New("akun tidak ditemukan")
+		return apperror.NotFound("Akun tidak ditemukan")
 	}
 
 	if user.IsVerified {
-		return errors.New("akun ini sudah terverifikasi sebelumnya")
+		return apperror.BadRequest("Akun ini sudah terverifikasi sebelumnya")
 	}
 
-	newOTP := utils.GenerateOTP()
+	newOTP, err := utils.GenerateOTP()
+	if err != nil {
+		return apperror.Internal("Gagal menghasilkan kode verifikasi baru", err)
+	}
+
 	expiresAt := time.Now().Add(10 * time.Minute)
 
 	user.VerificationCode = newOTP
 	user.CodeExpiresAt = &expiresAt
 
 	if err := s.userRepo.Update(user); err != nil {
-		return errors.New("gagal memperbarui kode verifikasi")
+		return apperror.Internal("Gagal memperbarui kode verifikasi", err)
 	}
 
 	log.Printf("[DEV OTP RESEND] New verification code for %s is: %s\n", user.Email, newOTP)
@@ -215,28 +223,28 @@ func (s *authService) Login(req LoginRequest) (*AuthResponse, error) {
 	req.EmailOrUsername = strings.TrimSpace(req.EmailOrUsername)
 
 	if req.EmailOrUsername == "" || req.Password == "" {
-		return nil, errors.New("email/username dan kata sandi wajib diisi")
+		return nil, apperror.BadRequest("Email/username dan kata sandi wajib diisi")
 	}
 
 	user, err := s.userRepo.FindByEmailOrUsername(req.EmailOrUsername)
 	if err != nil {
-		return nil, err
+		return nil, apperror.Internal("Gagal membaca data akun", err)
 	}
 	if user == nil {
-		return nil, errors.New("email atau username tidak ditemukan")
+		return nil, apperror.Unauthorized("Email/username atau kata sandi tidak valid")
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.PasswordHash) {
-		return nil, errors.New("kata sandi yang Anda masukkan salah")
+		return nil, apperror.Unauthorized("Email/username atau kata sandi tidak valid")
 	}
 
 	if !user.IsVerified {
-		return nil, errors.New("akun Anda belum diverifikasi, silakan lakukan verifikasi kode OTP terlebih dahulu")
+		return nil, apperror.Unauthorized("Akun Anda belum diverifikasi, silakan lakukan verifikasi kode OTP terlebih dahulu")
 	}
 
 	token, err := utils.GenerateToken(user.ID, user.Email, user.Username, s.jwtSecret, 7*24*time.Hour)
 	if err != nil {
-		return nil, errors.New("gagal menerbitkan token autentikasi")
+		return nil, apperror.Internal("Gagal menerbitkan token autentikasi", err)
 	}
 
 	return &AuthResponse{
@@ -256,30 +264,30 @@ type googleTokenInfo struct {
 
 func (s *authService) GoogleAuth(req GoogleAuthRequest) (*AuthResponse, error) {
 	if req.IDToken == "" {
-		return nil, errors.New("ID Token Google wajib disertakan")
+		return nil, apperror.BadRequest("ID Token Google wajib disertakan")
 	}
 
 	verifyURL := fmt.Sprintf("https://oauth2.googleapis.com/tokeninfo?id_token=%s", req.IDToken)
 	resp, err := http.Get(verifyURL)
 	if err != nil {
-		return nil, fmt.Errorf("gagal memverifikasi token ke server Google: %w", err)
+		return nil, apperror.Internal("Gagal memverifikasi token ke server Google", err)
 	}
 	defer resp.Body.Close()
 
 	var tokenInfo googleTokenInfo
 	if err := json.NewDecoder(resp.Body).Decode(&tokenInfo); err != nil {
-		return nil, errors.New("gagal membaca respon verifikasi Google")
+		return nil, apperror.Internal("Gagal membaca respon verifikasi Google", err)
 	}
 
 	if tokenInfo.Error != "" || tokenInfo.Email == "" {
-		return nil, errors.New("token Google tidak valid atau sudah kedaluwarsa")
+		return nil, apperror.Unauthorized("Token Google tidak valid atau sudah kedaluwarsa")
 	}
 
 	tokenInfo.Email = strings.ToLower(tokenInfo.Email)
 
 	user, err := s.userRepo.FindByEmail(tokenInfo.Email)
 	if err != nil {
-		return nil, err
+		return nil, apperror.Internal("Gagal memeriksa akun Google di database", err)
 	}
 
 	if user == nil {
@@ -294,7 +302,7 @@ func (s *authService) GoogleAuth(req GoogleAuthRequest) (*AuthResponse, error) {
 			AICredits:  10,
 		}
 		if err := s.userRepo.Create(user); err != nil {
-			return nil, fmt.Errorf("gagal membuat akun Google baru: %w", err)
+			return nil, apperror.Internal("Gagal mendaftarkan akun Google baru", err)
 		}
 	} else {
 		user.IsVerified = true
@@ -309,7 +317,7 @@ func (s *authService) GoogleAuth(req GoogleAuthRequest) (*AuthResponse, error) {
 
 	token, err := utils.GenerateToken(user.ID, user.Email, user.Username, s.jwtSecret, 7*24*time.Hour)
 	if err != nil {
-		return nil, errors.New("gagal menerbitkan token sesi")
+		return nil, apperror.Internal("Gagal menerbitkan token sesi", err)
 	}
 
 	return &AuthResponse{
@@ -321,10 +329,10 @@ func (s *authService) GoogleAuth(req GoogleAuthRequest) (*AuthResponse, error) {
 func (s *authService) GetProfile(userID uuid.UUID) (*model.User, error) {
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
-		return nil, err
+		return nil, apperror.Internal("Gagal mengambil data profil", err)
 	}
 	if user == nil {
-		return nil, errors.New("pengguna tidak ditemukan")
+		return nil, apperror.NotFound("Pengguna tidak ditemukan")
 	}
 	return user, nil
 }
@@ -332,19 +340,19 @@ func (s *authService) GetProfile(userID uuid.UUID) (*model.User, error) {
 func (s *authService) UpdateProfile(userID uuid.UUID, req UpdateProfileRequest) (*model.User, error) {
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
-		return nil, err
+		return nil, apperror.Internal("Gagal mencari data profil pengguna", err)
 	}
 	if user == nil {
-		return nil, errors.New("pengguna tidak ditemukan")
+		return nil, apperror.NotFound("Pengguna tidak ditemukan")
 	}
 
 	if req.Username != "" && strings.ToLower(req.Username) != strings.ToLower(user.Username) {
 		existing, err := s.userRepo.FindByUsername(req.Username)
 		if err != nil {
-			return nil, err
+			return nil, apperror.Internal("Gagal memvalidasi ketersediaan username", err)
 		}
 		if existing != nil && existing.ID != user.ID {
-			return nil, errors.New("username ini sudah digunakan oleh akun lain")
+			return nil, apperror.Conflict("Username ini sudah digunakan oleh akun lain")
 		}
 		user.Username = strings.ToLower(strings.TrimSpace(req.Username))
 	}
@@ -375,7 +383,7 @@ func (s *authService) UpdateProfile(userID uuid.UUID, req UpdateProfileRequest) 
 	}
 
 	if err := s.userRepo.Update(user); err != nil {
-		return nil, fmt.Errorf("gagal memperbarui profil: %w", err)
+		return nil, apperror.Internal("Gagal memperbarui data profil ke database", err)
 	}
 
 	return user, nil

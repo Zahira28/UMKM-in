@@ -1,6 +1,11 @@
 package response
 
 import (
+	"errors"
+	"log"
+
+	"backend/pkg/apperror"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -42,10 +47,27 @@ func SuccessWithMeta(c *fiber.Ctx, statusCode int, message string, data interfac
 	})
 }
 
-func Error(c *fiber.Ctx, statusCode int, message string, errors interface{}) error {
+func Error(c *fiber.Ctx, statusCode int, message string, errorsDetail interface{}) error {
 	return c.Status(statusCode).JSON(APIResponse{
 		Success: false,
 		Message: message,
-		Errors:  errors,
+		Errors:  errorsDetail,
 	})
+}
+
+func HandleError(c *fiber.Ctx, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	var appErr *apperror.AppError
+	if errors.As(err, &appErr) {
+		if appErr.StatusCode >= 500 && appErr.RawErr != nil {
+			log.Printf("[SERVER ERROR] %s: %v\n", appErr.Message, appErr.RawErr)
+		}
+		return Error(c, appErr.StatusCode, appErr.Message, appErr.Details)
+	}
+
+	log.Printf("[UNHANDLED ERROR] %v\n", err)
+	return Error(c, fiber.StatusInternalServerError, "Terjadi kesalahan internal pada server", nil)
 }
