@@ -69,14 +69,16 @@ type AuthService interface {
 }
 
 type authService struct {
-	userRepo  repository.UserRepository
-	jwtSecret string
+	userRepo       repository.UserRepository
+	jwtSecret      string
+	googleClientID string
 }
 
 func NewAuthService(userRepo repository.UserRepository, cfg *config.Config) AuthService {
 	return &authService{
-		userRepo:  userRepo,
-		jwtSecret: cfg.JWTSecret,
+		userRepo:       userRepo,
+		jwtSecret:      cfg.JWTSecret,
+		googleClientID: cfg.GoogleClientID,
 	}
 }
 
@@ -255,6 +257,7 @@ func (s *authService) Login(req LoginRequest) (*AuthResponse, error) {
 
 type googleTokenInfo struct {
 	Sub           string `json:"sub"`
+	Aud           string `json:"aud"`
 	Email         string `json:"email"`
 	EmailVerified string `json:"email_verified"`
 	Name          string `json:"name"`
@@ -281,6 +284,11 @@ func (s *authService) GoogleAuth(req GoogleAuthRequest) (*AuthResponse, error) {
 
 	if tokenInfo.Error != "" || tokenInfo.Email == "" {
 		return nil, apperror.Unauthorized("Token Google tidak valid atau sudah kedaluwarsa")
+	}
+
+	// Validasi audience jika GOOGLE_CLIENT_ID diset di environment
+	if s.googleClientID != "" && tokenInfo.Aud != s.googleClientID {
+		return nil, apperror.Unauthorized("Token Google tidak ditujukan untuk aplikasi ini")
 	}
 
 	tokenInfo.Email = strings.ToLower(tokenInfo.Email)

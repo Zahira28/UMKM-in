@@ -7,30 +7,32 @@ import (
 )
 
 type Config struct {
-	AppPort    string
-	AppEnv     string
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBSSLMode  string
-	JWTSecret  string
+	AppPort        string
+	AppEnv         string
+	DBHost         string
+	DBPort         string
+	DBUser         string
+	DBPassword     string
+	DBName         string
+	DBSSLMode      string
+	JWTSecret      string
+	GoogleClientID string
 }
 
 func LoadConfig() *Config {
 	_ = godotenv.Load()
 
 	return &Config{
-		AppPort:    getEnv("APP_PORT", "8080"),
-		AppEnv:     getEnv("APP_ENV", "development"),
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "postgres"),
-		DBName:     getEnv("DB_NAME", "umkmin_db"),
-		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
-		JWTSecret:  getEnv("JWT_SECRET", "supersecretkey_change_in_production"),
+		AppPort:        getEnv("APP_PORT", "8080"),
+		AppEnv:         getEnv("APP_ENV", "development"),
+		DBHost:         getEnv("DB_HOST", "localhost"),
+		DBPort:         getEnv("DB_PORT", "5432"),
+		DBUser:         getEnv("DB_USER", "postgres"),
+		DBPassword:     getEnv("DB_PASSWORD", "postgres"),
+		DBName:         getEnv("DB_NAME", "umkmin_db"),
+		DBSSLMode:      getEnv("DB_SSLMODE", "disable"),
+		JWTSecret:      getEnv("JWT_SECRET", "supersecretkey_change_in_production"),
+		GoogleClientID: getEnv("GOOGLE_CLIENT_ID", ""),
 	}
 }
 
