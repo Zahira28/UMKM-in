@@ -11,6 +11,8 @@ func SetupRoutes(
 	authHandler *AuthHandler,
 	categoryHandler *CategoryHandler,
 	productHandler *ProductHandler,
+	commentHandler *CommentHandler,
+	likeHandler *LikeHandler,
 	jwtSecret string,
 ) {
 	api := app.Group("/api/v1")
@@ -39,9 +41,22 @@ func SetupRoutes(
 	products.Get("", middleware.OptionalAuth(jwtSecret), productHandler.GetProducts)
 	products.Get("/:id", middleware.OptionalAuth(jwtSecret), productHandler.GetProductByID)
 
+	// Product comments (Public)
+	products.Get("/:id/comments", commentHandler.GetComments)
+
 	// Protected product routes (Create, Update, Delete)
 	productsProtected := products.Group("", middleware.Protected(jwtSecret))
 	productsProtected.Post("", productHandler.CreateProduct)
 	productsProtected.Put("/:id", productHandler.UpdateProduct)
 	productsProtected.Delete("/:id", productHandler.DeleteProduct)
+
+	// Comments & Likes on products (Protected)
+	productsProtected.Post("/:id/comments", commentHandler.CreateComment)
+	productsProtected.Post("/:id/like", likeHandler.ToggleLike)
+	productsProtected.Post("/:id/react", likeHandler.ToggleLike)
+
+	// Comment management (Protected - Edit & Delete)
+	commentsProtected := api.Group("/comments", middleware.Protected(jwtSecret))
+	commentsProtected.Put("/:id", commentHandler.UpdateComment)
+	commentsProtected.Delete("/:id", commentHandler.DeleteComment)
 }

@@ -13,6 +13,7 @@ type Comment struct {
 	ParentID  *uint64   `gorm:"index" json:"parent_id"`
 	Content   string    `gorm:"type:text;not null" json:"content"`
 	CreatedAt time.Time `gorm:"not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt time.Time `gorm:"not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 
 	// Relasi
 	User          *User     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user,omitempty"`
