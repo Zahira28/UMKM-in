@@ -86,7 +86,15 @@ func main() {
 		productService := service.NewProductService(productRepo, categoryRepo)
 		productHandler := handler.NewProductHandler(productService)
 
-		handler.SetupRoutes(app, authHandler, categoryHandler, productHandler, cfg.JWTSecret)
+		commentRepo := repository.NewCommentRepository(db)
+		commentService := service.NewCommentService(commentRepo, productRepo)
+		commentHandler := handler.NewCommentHandler(commentService)
+
+		likeRepo := repository.NewLikeRepository(db)
+		likeService := service.NewLikeService(likeRepo, productRepo)
+		likeHandler := handler.NewLikeHandler(likeService)
+
+		handler.SetupRoutes(app, authHandler, categoryHandler, productHandler, commentHandler, likeHandler, cfg.JWTSecret)
 	}
 
 	addr := fmt.Sprintf(":%s", cfg.AppPort)

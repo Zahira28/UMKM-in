@@ -114,3 +114,44 @@ Content-Type: application/json
 ### 14. Hapus Produk dari Etalase (Protected - Hanya Pemilik)
 DELETE {{baseUrl}}/products/{{productId}}
 Authorization: Bearer {{authToken}}
+
+### 15. Ambil Daftar Komentar Produk (Publik)
+GET {{baseUrl}}/products/{{productId}}/comments
+
+### 16. Kirim Komentar Baru pada Produk (Protected)
+POST {{baseUrl}}/products/{{productId}}/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "content": "Bisa kirim ke area Buah Batu Bandung nggak kak?",
+  "parent_id": null
+}
+
+### 17. Balas Komentar yang Sudah Ada (Protected - Nested Reply)
+@parentCommentId = 1
+POST {{baseUrl}}/products/{{productId}}/comments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "content": "Bisa kak, kami pakai kurir instan!",
+  "parent_id": {{parentCommentId}}
+}
+
+### 18. Edit Komentar Sendiri (Protected - Hanya Pembuat Komentar)
+PUT {{baseUrl}}/comments/{{parentCommentId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "content": "Bisa kirim ke area Buah Batu Bandung besok pagi nggak kak?"
+}
+
+### 19. Hapus Komentar (Protected - Pembuat Komentar atau Pemilik Toko)
+DELETE {{baseUrl}}/comments/{{parentCommentId}}
+Authorization: Bearer {{authToken}}
+
+### 20. Toggle Suka / Like Produk (Protected)
+POST {{baseUrl}}/products/{{productId}}/like
+Authorization: Bearer {{authToken}}

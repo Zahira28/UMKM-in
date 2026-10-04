@@ -18,6 +18,13 @@ definitions:
       success:
         type: boolean
     type: object
+  service.CreateCommentRequest:
+    properties:
+      content:
+        type: string
+      parent_id:
+        type: integer
+    type: object
   service.CreateProductRequest:
     properties:
       category_id:
@@ -61,6 +68,11 @@ definitions:
   service.ResendOTPRequest:
     properties:
       email:
+        type: string
+    type: object
+  service.UpdateCommentRequest:
+    properties:
+      content:
         type: string
     type: object
   service.UpdateProductRequest:
@@ -328,6 +340,89 @@ paths:
       summary: Ambil seluruh daftar kategori produk
       tags:
       - Categories
+  /comments/{id}:
+    delete:
+      description: Menghapus komentar dari produk. Dapat dilakukan oleh pembuat komentar
+        atau pemilik produk/toko.
+      parameters:
+      - description: ID Komentar
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Hapus komentar
+      tags:
+      - Comments
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui isi teks komentar yang pernah dibuat. Hanya dapat dilakukan
+        oleh pembuat komentar itu sendiri.
+      parameters:
+      - description: ID Komentar
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Data Pembaruan Komentar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Edit teks komentar
+      tags:
+      - Comments
   /products:
     get:
       description: Mengambil katalog produk dengan opsi filter kategori, pencarian
@@ -509,6 +604,109 @@ paths:
       summary: Perbarui data produk
       tags:
       - Products
+  /products/{id}/comments:
+    get:
+      description: Mengambil semua komentar pada produk beserta balasan bertingkat
+        (nested replies).
+      parameters:
+      - description: UUID Produk
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Ambil daftar komentar produk
+      tags:
+      - Comments
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan komentar baru ke produk atau membalas komentar yang
+        sudah ada dengan menyertakan parent_id.
+      parameters:
+      - description: UUID Produk
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Isi Komentar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Kirim komentar baru atau balasan
+      tags:
+      - Comments
+  /products/{id}/like:
+    post:
+      description: Menyukai produk atau membatalkan suka (unlike) pada produk. Memerlukan
+        autentikasi.
+      parameters:
+      - description: UUID Produk
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Toggle suka / reaction pada produk
+      tags:
+      - Likes
 securityDefinitions:
   BearerAuth:
     description: 'Masukkan token JWT dengan format: Bearer <token>'
