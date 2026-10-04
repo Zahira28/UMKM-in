@@ -21,5 +21,9 @@ func main() {
 		log.Fatalf("Database auto-migration error: %v", err)
 	}
 
+	if err := database.SeedCategories(db); err != nil {
+		log.Fatalf("Database category seeding error: %v", err)
+	}
+
 	log.Println("Database migration completed successfully!")
 }
