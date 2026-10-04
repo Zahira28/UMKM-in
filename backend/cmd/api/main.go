@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	_ "backend/docs"
 	"backend/internal/config"
 	"backend/internal/database"
 	"backend/internal/handler"
@@ -13,8 +14,20 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/swagger"
 )
 
+// @title UMKM-in Backend API
+// @version 1.0
+// @description API backend service untuk aplikasi UMKM-in (Senior Project TI UGM)
+// @contact.name Tim Senior Project UMKM-in
+// @license.name MIT
+// @host localhost:8080
+// @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Masukkan token JWT dengan format: Bearer <token>
 func main() {
 	cfg := config.LoadConfig()
 
@@ -38,6 +51,12 @@ func main() {
 		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
+
+	// Swagger UI route
+	app.Get("/swagger", func(c *fiber.Ctx) error {
+		return c.Redirect("/swagger/index.html", fiber.StatusMovedPermanently)
+	})
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	// Health check endpoint
 	app.Get("/api/health", func(c *fiber.Ctx) error {
@@ -72,5 +91,6 @@ func main() {
 
 	addr := fmt.Sprintf(":%s", cfg.AppPort)
 	log.Printf("Server is running on http://localhost%s\n", addr)
+	log.Printf("Swagger documentation is accessible at http://localhost%s/swagger\n", addr)
 	log.Fatal(app.Listen(addr))
 }

@@ -15,6 +15,13 @@ func NewCategoryHandler(categoryService service.CategoryService) *CategoryHandle
 	return &CategoryHandler{categoryService: categoryService}
 }
 
+// GetCategories godoc
+// @Summary Ambil seluruh daftar kategori produk
+// @Description Mengambil semua kategori produk yang tersedia untuk filter dropdown di frontend.
+// @Tags Categories
+// @Produce json
+// @Success 200 {object} response.APIResponse
+// @Router /categories [get]
 func (h *CategoryHandler) GetCategories(c *fiber.Ctx) error {
 	categories, err := h.categoryService.GetCategories()
 	if err != nil {

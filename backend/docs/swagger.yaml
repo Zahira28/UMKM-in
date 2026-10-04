@@ -1,0 +1,518 @@
+basePath: /api/v1
+definitions:
+  response.APIResponse:
+    properties:
+      data: {}
+      errors: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  response.APIResponseWithMeta:
+    properties:
+      data: {}
+      message:
+        type: string
+      meta: {}
+      success:
+        type: boolean
+    type: object
+  service.CreateProductRequest:
+    properties:
+      category_id:
+        type: integer
+      description:
+        type: string
+      is_available:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      raw_image_url:
+        type: string
+      studio_image_url:
+        type: string
+      unit:
+        type: string
+    type: object
+  service.GoogleAuthRequest:
+    properties:
+      id_token:
+        type: string
+    type: object
+  service.LoginRequest:
+    properties:
+      email_or_username:
+        type: string
+      password:
+        type: string
+    type: object
+  service.RegisterRequest:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      password:
+        type: string
+    type: object
+  service.ResendOTPRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  service.UpdateProductRequest:
+    properties:
+      category_id:
+        type: integer
+      description:
+        type: string
+      is_available:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      raw_image_url:
+        type: string
+      studio_image_url:
+        type: string
+      unit:
+        type: string
+    type: object
+  service.UpdateProfileRequest:
+    properties:
+      address_detail:
+        type: string
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      city:
+        type: string
+      full_name:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      phone_number:
+        type: string
+      username:
+        type: string
+    type: object
+  service.VerifyOTPRequest:
+    properties:
+      email:
+        type: string
+      otp_code:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Tim Senior Project UMKM-in
+  description: API backend service untuk aplikasi UMKM-in (Senior Project TI UGM)
+  license:
+    name: MIT
+  title: UMKM-in Backend API
+  version: "1.0"
+paths:
+  /auth/google:
+    post:
+      consumes:
+      - application/json
+      description: Melakukan autentikasi menggunakan Google ID token dari frontend
+        Google Identity Services.
+      parameters:
+      - description: Google ID Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.GoogleAuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Login / Daftar via Google OAuth 2.0
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Masuk ke akun menggunakan email atau username terdaftar beserta
+        kata sandi.
+      parameters:
+      - description: Kredensial Login
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Login akun manual
+      tags:
+      - Auth
+  /auth/profile:
+    get:
+      description: Mendapatkan data profil akun pemilik token JWT aktif.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Ambil profil pengguna yang sedang login
+      tags:
+      - Auth
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui informasi profil toko atau melengkapi data setelah
+        onboarding.
+      parameters:
+      - description: Data Pembaruan Profil
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Lengkapi / Perbarui profil pengguna
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Mendaftar akun UMKM-in menggunakan nama lengkap, email, dan kata
+        sandi. Kode OTP akan dikirimkan ke email.
+      parameters:
+      - description: Data Registrasi Akun
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Register pengguna baru
+      tags:
+      - Auth
+  /auth/resend-otp:
+    post:
+      consumes:
+      - application/json
+      description: Mengirimkan kode OTP baru ke email yang terdaftar jika kode sebelumnya
+        kedaluwarsa.
+      parameters:
+      - description: Email pengguna
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ResendOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Kirim ulang kode OTP
+      tags:
+      - Auth
+  /auth/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Memverifikasi kode OTP 6 digit yang dikirimkan ke email untuk mengaktifkan
+        akun.
+      parameters:
+      - description: Data Verifikasi OTP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.VerifyOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Verifikasi OTP Email
+      tags:
+      - Auth
+  /categories:
+    get:
+      description: Mengambil semua kategori produk yang tersedia untuk filter dropdown
+        di frontend.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Ambil seluruh daftar kategori produk
+      tags:
+      - Categories
+  /products:
+    get:
+      description: Mengambil katalog produk dengan opsi filter kategori, pencarian
+        teks, pengurutan harga/waktu, dan pagination.
+      parameters:
+      - description: Filter slug kategori (makanan, minuman, pakaian)
+        in: query
+        name: category
+        type: string
+      - description: Kata kunci pencarian judul atau deskripsi
+        in: query
+        name: search
+        type: string
+      - description: 'Urutan sorting: latest (default), cheapest, priciest'
+        in: query
+        name: sort
+        type: string
+      - description: UUID Penjual (filter produk milik seller tertentu)
+        in: query
+        name: user_id
+        type: string
+      - description: 'Nomor halaman (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Jumlah item per halaman (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponseWithMeta'
+      summary: Ambil linimasa / feed produk publik
+      tags:
+      - Products
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data produk baru ke etalase toko. Memerlukan autentikasi
+        seller.
+      parameters:
+      - description: Data Produk Baru
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Tambah produk baru ke etalase
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      description: Menghapus produk dari etalase toko secara permanen. Hanya dapat
+        dilakukan oleh pemilik produk.
+      parameters:
+      - description: UUID Produk
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Hapus produk dari etalase
+      tags:
+      - Products
+    get:
+      description: Mengambil rincian informasi lengkap sebuah produk beserta informasi
+        toko penjual.
+      parameters:
+      - description: UUID Produk
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Ambil detail produk berdasarkan ID
+      tags:
+      - Products
+    put:
+      consumes:
+      - application/json
+      description: Mengubah rincian informasi produk di etalase. Hanya dapat dilakukan
+        oleh pemilik produk.
+      parameters:
+      - description: UUID Produk
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data Produk Baru
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Perbarui data produk
+      tags:
+      - Products
+securityDefinitions:
+  BearerAuth:
+    description: 'Masukkan token JWT dengan format: Bearer <token>'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
