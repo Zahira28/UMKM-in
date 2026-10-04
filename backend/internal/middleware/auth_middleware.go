@@ -34,3 +34,27 @@ func Protected(jwtSecret string) fiber.Handler {
 		return c.Next()
 	}
 }
+
+func OptionalAuth(jwtSecret string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		authHeader := c.Get("Authorization")
+		if authHeader == "" {
+			return c.Next()
+		}
+
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+			return c.Next()
+		}
+
+		tokenString := parts[1]
+		claims, err := utils.ValidateToken(tokenString, jwtSecret)
+		if err == nil && claims != nil {
+			c.Locals("userID", claims.UserID)
+			c.Locals("userEmail", claims.Email)
+			c.Locals("username", claims.Username)
+		}
+
+		return c.Next()
+	}
+}

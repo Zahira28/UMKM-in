@@ -66,3 +66,51 @@ Content-Type: application/json
   "longitude": 107.604212,
   "avatar_url": "https://storage.umkm-in.id/avatars/ayu.jpg"
 }
+
+### 8. Ambil Seluruh Kategori Produk
+GET {{baseUrl}}/categories
+
+### 9. Tambah Produk Baru (Protected)
+# Wajib sertakan token login seller
+POST {{baseUrl}}/products
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "name": "Kue Gula Aren Rumahan",
+  "description": "Kue gula aren buatan rumahan dengan bahan pilihan segar setiap hari.",
+  "price": 35000,
+  "unit": "box",
+  "raw_image_url": "https://storage.umkm-in.id/products/raw-1.jpg",
+  "studio_image_url": "https://storage.umkm-in.id/products/studio-1.jpg",
+  "is_available": true
+}
+
+### 10. Ambil Feed Produk (Publik / Optional Auth)
+GET {{baseUrl}}/products?page=1&limit=10
+
+### 11. Ambil Feed Produk dengan Filter Kategori & Pencarian
+GET {{baseUrl}}/products?category=makanan&search=gula&sort=cheapest
+
+### 12. Ambil Detail Produk berdasarkan UUID (Publik / Optional Auth)
+# Ganti UUID berikut dengan id produk yang didapatkan dari response pembuatan produk
+@productId = 00000000-0000-0000-0000-000000000000
+GET {{baseUrl}}/products/{{productId}}
+
+### 13. Perbarui Data Produk (Protected - Hanya Pemilik)
+PUT {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Kue Gula Aren Premium Spesial",
+  "description": "Kue gula aren premium resep turun temurun.",
+  "price": 38000,
+  "unit": "box",
+  "is_available": true
+}
+
+### 14. Hapus Produk dari Etalase (Protected - Hanya Pemilik)
+DELETE {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{authToken}}

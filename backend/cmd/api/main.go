@@ -26,6 +26,9 @@ func main() {
 		if err := database.AutoMigrate(db); err != nil {
 			log.Printf("Warning: Database auto-migration failed: %v\n", err)
 		}
+		if err := database.SeedCategories(db); err != nil {
+			log.Printf("Warning: Database category seeding failed: %v\n", err)
+		}
 	}
 
 	app := fiber.New()
@@ -50,13 +53,21 @@ func main() {
 		})
 	})
 
-	// Dependency injection for authentication module
+	// Dependency injection for modules
 	if db != nil {
 		userRepo := repository.NewUserRepository(db)
 		authService := service.NewAuthService(userRepo, cfg)
 		authHandler := handler.NewAuthHandler(authService)
 
-		handler.SetupRoutes(app, authHandler, cfg.JWTSecret)
+		categoryRepo := repository.NewCategoryRepository(db)
+		categoryService := service.NewCategoryService(categoryRepo)
+		categoryHandler := handler.NewCategoryHandler(categoryService)
+
+		productRepo := repository.NewProductRepository(db)
+		productService := service.NewProductService(productRepo, categoryRepo)
+		productHandler := handler.NewProductHandler(productService)
+
+		handler.SetupRoutes(app, authHandler, categoryHandler, productHandler, cfg.JWTSecret)
 	}
 
 	addr := fmt.Sprintf(":%s", cfg.AppPort)
