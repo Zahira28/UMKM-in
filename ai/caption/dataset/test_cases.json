@@ -1,0 +1,222 @@
+[
+  {
+    "id": "TC01",
+    "scenario": "informal_language",
+    "input": {
+      "name": "Cookies Gula Aren",
+      "category": "Makanan",
+      "price": 35000,
+      "description": "cookies pake gula aren, renyah, enak bgt"
+    },
+    "expected_behavior": "Memperbaiki bahasa informal menjadi deskripsi yang natural dan menarik tanpa menambahkan informasi produk."
+  },
+  {
+    "id": "TC02",
+    "scenario": "spelling_errors",
+    "input": {
+      "name": "Keripik Pisang Coklat",
+      "category": "Makanan",
+      "price": 18000,
+      "description": "kripik pisang rasa coklat yg enak bgt, cocok bwt cemilan"
+    },
+    "expected_behavior": "Memperbaiki kesalahan ejaan dan singkatan tanpa mengubah karakteristik produk."
+  },
+  {
+    "id": "TC03",
+    "scenario": "informal_language",
+    "input": {
+      "name": "Kopi Susu Gula Aren",
+      "category": "Minuman",
+      "price": 22000,
+      "description": "kopi susu gula aren, rasanya mantap dan bikin nagih"
+    },
+    "expected_behavior": "Mengubah bahasa informal menjadi kalimat promosi yang lebih rapi tanpa membuat klaim tambahan."
+  },
+  {
+    "id": "TC04",
+    "scenario": "spelling_errors",
+    "input": {
+      "name": "Brownies Coklat",
+      "category": "Makanan",
+      "price": 25000,
+      "description": "brownies coklat lembutt, maniss, cocok buat temen ngopi"
+    },
+    "expected_behavior": "Memperbaiki ejaan dan tanda baca serta mempertahankan informasi mengenai rasa dan penggunaan produk."
+  },
+  {
+    "id": "TC05",
+    "scenario": "minimal_information",
+    "input": {
+      "name": "Totebag Kanvas",
+      "category": "Fashion",
+      "price": 45000,
+      "description": "totebag kanvas"
+    },
+    "expected_behavior": "Tidak mengarang ukuran, warna, kapasitas, desain, atau keunggulan yang tidak disebutkan."
+  },
+  {
+    "id": "TC06",
+    "scenario": "minimal_information",
+    "input": {
+      "name": "Gantungan Kunci Rajut",
+      "category": "Kerajinan",
+      "price": 15000,
+      "description": "gantungan kunci rajut handmade"
+    },
+    "expected_behavior": "Mempertahankan informasi bahwa produk merupakan gantungan kunci rajut handmade tanpa mengarang desain atau bahan tambahan."
+  },
+  {
+    "id": "TC07",
+    "scenario": "empty_description",
+    "input": {
+      "name": "Lilin Aromaterapi",
+      "category": "Home Living",
+      "price": 50000,
+      "description": ""
+    },
+    "expected_behavior": "Tidak membuat deskripsi produk berdasarkan asumsi. Memberikan catatan bahwa informasi produk perlu dilengkapi."
+  },
+  {
+    "id": "TC08",
+    "scenario": "empty_description",
+    "input": {
+      "name": "Sepatu Handmade",
+      "category": "Fashion",
+      "price": 120000,
+      "description": ""
+    },
+    "expected_behavior": "Tidak mengarang bahan, ukuran, warna, model, atau keunggulan sepatu. Menandai bahwa informasi produk belum cukup."
+  },
+  {
+    "id": "TC09",
+    "scenario": "unsupported_claims",
+    "input": {
+      "name": "Serum Wajah",
+      "category": "Kecantikan",
+      "price": 75000,
+      "description": "serum ampuh bikin putih dalam 3 hari, menghilangkan semua jerawat, dijamin aman"
+    },
+    "expected_behavior": "Tidak mempertahankan klaim hasil instan, jaminan keamanan, atau manfaat yang tidak memiliki informasi pendukung. Tidak mengarang kandungan serum."
+  },
+  {
+    "id": "TC10",
+    "scenario": "unsupported_claims",
+    "input": {
+      "name": "Madu Hutan",
+      "category": "Makanan",
+      "price": 85000,
+      "description": "madu asli dijamin menyembuhkan semua penyakit dan meningkatkan imun tubuh"
+    },
+    "expected_behavior": "Tidak mempertahankan klaim penyembuhan penyakit atau manfaat kesehatan yang tidak didukung informasi."
+  },
+  {
+    "id": "TC11",
+    "scenario": "unsupported_claims",
+    "input": {
+      "name": "Sabun Herbal",
+      "category": "Perawatan Tubuh",
+      "price": 20000,
+      "description": "sabun herbal 100 persen organik, sudah BPOM, aman untuk semua jenis kulit"
+    },
+    "expected_behavior": "BPOM dipertahankan persis seperti tulisan penjual, tidak diperkuat."
+  },
+  {
+    "id": "TC12",
+    "scenario": "contradictory_information",
+    "input": {
+      "name": "Tas Kanvas",
+      "category": "Fashion",
+      "price": 90000,
+      "description": "tas berbahan kulit sintetis dengan bahan utama kanvas"
+    },
+    "expected_behavior": "Tidak menentukan sendiri bahan yang benar ketika informasi saling bertentangan. Hindari klaim bahan dan berikan catatan untuk konfirmasi."
+  },
+  {
+    "id": "TC13",
+    "scenario": "contradictory_information",
+    "input": {
+      "name": "Kemeja Polos",
+      "category": "Fashion",
+      "price": 65000,
+      "description": "kemeja lengan panjang dengan model lengan pendek"
+    },
+    "expected_behavior": "Tidak memilih salah satu spesifikasi yang bertentangan. Berikan catatan untuk meminta klarifikasi penjual."
+  },
+  {
+    "id": "TC14",
+    "scenario": "contradictory_information",
+    "input": {
+      "name": "Kue Kering",
+      "category": "Makanan",
+      "price": 40000,
+      "description": "kue kering rasa coklat dengan rasa vanilla"
+    },
+    "expected_behavior": "Tidak mengasumsikan rasa yang benar jika informasi tidak jelas. Meminta konfirmasi mengenai varian rasa."
+  },
+  {
+    "id": "TC15",
+    "scenario": "well_written_description",
+    "input": {
+      "name": "Lilin Aromaterapi Lavender",
+      "category": "Home Living",
+      "price": 55000,
+      "description": "Lilin aromaterapi dengan aroma lavender yang memberikan suasana nyaman di dalam ruangan. Cocok digunakan sebagai dekorasi rumah."
+    },
+    "expected_behavior": "Mempertahankan kualitas deskripsi dan hanya melakukan penyempurnaan seperlunya tanpa menambahkan klaim baru."
+  },
+  {
+    "id": "TC16",
+    "scenario": "well_written_description",
+    "input": {
+      "name": "Gantungan Kunci Rajut",
+      "category": "Kerajinan",
+      "price": 18000,
+      "description": "Gantungan kunci rajut handmade dengan desain sederhana. Dapat digunakan sebagai aksesori tas maupun gantungan kunci."
+    },
+    "expected_behavior": "Mempertahankan informasi produk dan menyempurnakan kalimat jika diperlukan tanpa mengubah makna."
+  },
+  {
+    "id": "TC17",
+    "scenario": "well_written_description",
+    "input": {
+      "name": "Kopi Arabika",
+      "category": "Minuman",
+      "price": 40000,
+      "description": "Kopi Arabika pilihan untuk menemani aktivitas sehari-hari. Dikemas dengan praktis sehingga mudah disimpan."
+    },
+    "expected_behavior": "Tidak melakukan perubahan berlebihan dan mempertahankan informasi yang sudah tersedia."
+  },
+  {
+    "id": "TC18",
+    "scenario": "category_variation",
+    "input": {
+      "name": "Pot Tanaman Minimalis",
+      "category": "Dekorasi",
+      "price": 30000,
+      "description": "pot tanaman minimalis buat hias meja dan mempercantik ruangan"
+    },
+    "expected_behavior": "Menghasilkan deskripsi dan hashtag yang sesuai dengan kategori dekorasi rumah."
+  },
+  {
+    "id": "TC19",
+    "scenario": "category_variation",
+    "input": {
+      "name": "Notebook Handmade",
+      "category": "Alat Tulis",
+      "price": 25000,
+      "description": "buku catatan handmade buat nulis ide, tugas, dan catatan harian"
+    },
+    "expected_behavior": "Menghasilkan deskripsi yang sesuai untuk produk alat tulis serta hashtag yang relevan."
+  },
+  {
+    "id": "TC20",
+    "scenario": "category_variation",
+    "input": {
+      "name": "Tas Rajut",
+      "category": "Fashion",
+      "price": 95000,
+      "description": "tas rajut handmade cocok buat jalan jalan dan dipakai sehari hari"
+    },
+    "expected_behavior": "Memperbaiki bahasa dan membuat hashtag yang relevan dengan produk fashion tanpa mengarang ukuran atau bahan."
+  }
+]
